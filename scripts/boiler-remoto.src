@@ -4,13 +4,15 @@ if not metaxploit then metaxploit = include_lib(current_path+"/metaxploit.so")
 if not metaxploit then exit("no hay metaxploit.so")
 
 //Ya tenemos metaexploit, vamos con los parámetros
-if params.len == 0 or params.len > 2 then exit("Error: necesito una IP o IP puerto")
-if params.len == 1 then 
-	source = params[0]
+if params.len < 3 or params.len > 4 then exit("Error: necesito una dirección, una función a explotar, una IP y un puerto opcional")
+dir=params[0]
+func=params[1]
+if params.len == 3 then 
+	source = params[2]
 	puerto = 0 //Cambiar por puerto remoto, o 0 para router
 else
-	source = params[0]
-	puerto = params[1].to_int
+	source = params[2]
+	puerto = params[3].to_int
 end if
 
 // Creamos sesión y cargamos la librería a reventar
@@ -18,8 +20,8 @@ net_session = metaxploit.net_use(source, puerto)
 if not net_session then exit("No se puede conectar con " + source + ":" + puerto + "\n")
 metaLib = net_session.dump_lib
 
-print("\nexplotando address exploit")
-result = metaLib.overflow("address","exploit")
+print("\nexplotando address exploit en " + dir + " " + func + " en " + source + ":" + puerto )
+result = metaLib.overflow(dir,func)
 if not result then
 	print("Exploit fallido\n")
 else
@@ -30,5 +32,8 @@ else
 		else 
 			print ("Fichero: " + result.path + "/" + result.name + "\n")
 		end if
+	end if
+	if typeof(result) == "shell" then
+		result.start_terminal
 	end if
 end if

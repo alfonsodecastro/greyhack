@@ -4,15 +4,17 @@ if not metaxploit then metaxploit = include_lib(current_path+"/metaxploit.so")
 if not metaxploit then exit("no hay metaxploit.so")
 
 //Ya tenemos metaexploit, vamos con los parámetros
-if params.len == 0 or params.len > 1 then exit("Error: necesito una librería local")
+if params.len != 3 then exit("Error: necesito una librería local, la dirección del exploit y el nombre de la función")
 source = params[0]
+dir = params[1]
+func=params[2]
 
 // Creamos sesión y cargamos la librería a reventar
 metaLib = metaxploit.load(source)
 if not metaLib then exit("No se puede cargar la librería "+ source + "\n")
 
-print("\nexplotando address exploit")
-result = metaLib.overflow("address","exploit")
+print("\nexplotando " + dir + " " + func + " en " + source)
+result = metaLib.overflow(dir,func)
 if not result then
 	print("Exploit fallido\n")
 else
@@ -23,5 +25,10 @@ else
 		else 
 			print ("Fichero: " + result.path + "/" + result.name + "\n")
 		end if
+		print(result.content)
 	end if
+	if typeof(result) == "shell" then
+		result.start_terminal
+	end if
+	
 end if
